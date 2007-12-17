@@ -12,7 +12,6 @@ Patch: muinescrobbler-new-mono.patch.bz2
 License: GPL
 Group: Sound
 Url: http://home.gna.org/muinescrobbler/
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 BuildArch: noarch
 BuildRequires: muine
 Requires: muine
