@@ -1,6 +1,6 @@
 %define name muinescrobbler
 %define version 0.1.8
-%define release %mkrel 5
+%define release %mkrel 4
 %define plugindir %_prefix/lib/muine/plugins
 
 Summary: Audioscrobbler plugin for Muine
@@ -8,13 +8,15 @@ Name: %{name}
 Version: %{version}
 Release: %{release}
 Source0: http://download.gna.org/muinescrobbler/%{name}-%{version}.tar.bz2
-Patch: muinescrobbler-new-mono.patch.bz2
-License: GPL
+Patch: muinescrobbler-new-mono.patch
+Patch1: muinescrobbler-fix-linking.patch
+License: GPLv2+
 Group: Sound
 Url: http://home.gna.org/muinescrobbler/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 BuildArch: noarch
 BuildRequires: muine
+BuildRequires: gnome-sharp2-devel
 Requires: muine
 
 %description
@@ -24,6 +26,7 @@ http://www.audioscrobbler.com
 %prep
 %setup -q -n %name
 %patch -p1
+%patch1 -p1
 
 %build
 make
