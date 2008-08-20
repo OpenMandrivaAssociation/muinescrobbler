@@ -1,6 +1,6 @@
 %define name muinescrobbler
 %define version 0.1.8
-%define release %mkrel 4
+%define release %mkrel 5
 %define plugindir %_prefix/lib/muine/plugins
 
 Summary: Audioscrobbler plugin for Muine
