@@ -1,0 +1,216 @@
+diff -ur muinescrobbler/AudioscrobblerPlugin.cs muinescrobbler.new/AudioscrobblerPlugin.cs
+--- muinescrobbler/AudioscrobblerPlugin.cs	2005-11-20 23:31:39.000000000 +0200
++++ muinescrobbler.new/AudioscrobblerPlugin.cs	2006-03-14 11:04:43.000000000 +0200
+@@ -401,31 +401,38 @@
+     // Audioscrobbler events
+     //
+ 
+-    private void OnAuthErrorEvent(AuthErrorEventArgs args)
++    private int OnAuthErrorEvent(AuthErrorEventArgs args)
+     {
+       string report = "Audioscrobbler did not recognize your username/password."
+                     + " Please check your details (File/Audioscrobbler...)";
+       ShowErrorMessage(report);
+       OnDisconnectButtonClicked(null, null);
++
++		return 0;
+     }
+ 
+-    private void OnNetworkErrorEvent(NetworkErrorEventArgs args)
++    private int OnNetworkErrorEvent(NetworkErrorEventArgs args)
+     {
+       StatusBar.Pop(StatusID);
+       StatusBar.Push(StatusID, args.Details);
+       //OnDisconnectButtonClicked(null, null);
++
++		return 0;
+     }
+ 
+-    private void OnUpdateAvailableEvent(UpdateAvailableEventArgs args)
++    private int OnUpdateAvailableEvent(UpdateAvailableEventArgs args)
+     {
+-      if (!CheckShowUpgrade.Active)
+-        return;
+-      string report = "A new version of the Audioscrobbler plugin is"
+-                    + "available at:\n" + args.version;
+-      ShowErrorMessage(report);
++      if (CheckShowUpgrade.Active)
++		{
++			string report = "A new version of the Audioscrobbler plugin is"
++				+ "available at:\n" + args.version;
++			ShowErrorMessage(report);
++		}
++
++		return 0;
+     }
+     
+-    private void OnSubmitEvent (SubmitEventArgs args)
++    private int OnSubmitEvent (SubmitEventArgs args)
+     {
+       CacheSizeLabel.Text = scrobbler.QueueLength.ToString();
+       string title = args.song.Artist + " - " + args.song.Title;
+@@ -435,18 +442,24 @@
+       // Consider the song to be submitted if a connection was made -
+       // AS can't reject individual songs.
+       AddToHistory("Submitted", args.song);
++
++		return 0;
+     }
+   
+-    private void OnConnectEvent(ConnectEventArgs args)
++    private int OnConnectEvent(ConnectEventArgs args)
+     {
+       StatusBar.Pop(StatusID);
+       StatusBar.Push(StatusID, "Connected.");
++
++		return 0;
+     }
+ 
+-    private void OnDisconnectEvent(DisconnectEventArgs args)
++    private int OnDisconnectEvent(DisconnectEventArgs args)
+     {
+       StatusBar.Pop(StatusID);
+       StatusBar.Push(StatusID, "Disconnected.");
++
++		return 0;
+     }
+ 
+ 
+diff -ur muinescrobbler/EventQueue.cs muinescrobbler.new/EventQueue.cs
+--- muinescrobbler/EventQueue.cs	2005-09-26 20:51:29.000000000 +0300
++++ muinescrobbler.new/EventQueue.cs	2006-03-14 11:01:25.000000000 +0200
+@@ -48,7 +48,7 @@
+    * loop.
+    * \param func The function to be called.
+    */
+-  public void Queue (Functor<void> func_)
++  public void Queue (Functor<int> func_)
+   {
+     lock (eventQueueLock) {
+       eventQueue.Add (func_);
+@@ -64,13 +64,13 @@
+     // Copy the event list.
+     ArrayList events = new ArrayList();
+     lock (eventQueueLock) {
+-      foreach (Functor<void> function in eventQueue)
++      foreach (Functor<int> function in eventQueue)
+         events.Add(function);
+       eventQueue.Clear();
+     }
+ 
+     // Invoke every event.
+-    foreach (Functor<void> function in events)
++    foreach (Functor<int> function in events)
+       function();
+     return false;
+   }
+diff -ur muinescrobbler/GAudioscrobbler.cs muinescrobbler.new/GAudioscrobbler.cs
+--- muinescrobbler/GAudioscrobbler.cs	2005-11-20 23:31:17.000000000 +0200
++++ muinescrobbler.new/GAudioscrobbler.cs	2006-03-14 11:02:02.000000000 +0200
+@@ -142,28 +142,28 @@
+   public class GAudioscrobbler
+   {
+     /// Called whenever a network error occurs.
+-    public event Functor<void, NetworkErrorEventArgs> NetworkErrorEvent;
+-    public event Functor<void, NetworkErrorEventArgs> NetworkErrorEventLazy;
++    public event Functor<int, NetworkErrorEventArgs> NetworkErrorEvent;
++    public event Functor<int, NetworkErrorEventArgs> NetworkErrorEventLazy;
+ 
+     /// Called whenever an authentication failure happened.
+-    public event Functor<void, AuthErrorEventArgs> AuthErrorEvent;
+-    public event Functor<void, AuthErrorEventArgs> AuthErrorEventLazy;
++    public event Functor<int, AuthErrorEventArgs> AuthErrorEvent;
++    public event Functor<int, AuthErrorEventArgs> AuthErrorEventLazy;
+ 
+     /// Called whenever the handshake (login) was successful.
+-    public event Functor<void, ConnectEventArgs> ConnectEvent;
+-    public event Functor<void, ConnectEventArgs> ConnectEventLazy;
++    public event Functor<int, ConnectEventArgs> ConnectEvent;
++    public event Functor<int, ConnectEventArgs> ConnectEventLazy;
+ 
+     /// Called whenever the connection was successfully terminated.
+-    public event Functor<void, DisconnectEventArgs> DisconnectEvent;
+-    public event Functor<void, DisconnectEventArgs> DisconnectEventLazy;
++    public event Functor<int, DisconnectEventArgs> DisconnectEvent;
++    public event Functor<int, DisconnectEventArgs> DisconnectEventLazy;
+     
+     /// Called whenever a song was successfully submitted.
+-    public event Functor<void, SubmitEventArgs> SubmitEvent;
+-    public event Functor<void, SubmitEventArgs> SubmitEventLazy;
++    public event Functor<int, SubmitEventArgs> SubmitEvent;
++    public event Functor<int, SubmitEventArgs> SubmitEventLazy;
+     
+     /// Called when availibility of a client update was detected.
+-    public event Functor<void, UpdateAvailableEventArgs> UpdateAvailableEvent;
+-    public event Functor<void, UpdateAvailableEventArgs> UpdateAvailableEventLazy;
++    public event Functor<int, UpdateAvailableEventArgs> UpdateAvailableEvent;
++    public event Functor<int, UpdateAvailableEventArgs> UpdateAvailableEventLazy;
+     
+     // Constants.
+     const int    MAX_QUEUE_SIZE      = 1000;
+@@ -368,8 +368,8 @@
+         AuthErrorEvent(args_);
+       if (AuthErrorEventLazy == null)
+         return;
+-      Functor<void> func =
+-        EventQueue.BindOne<void, AuthErrorEventArgs>(AuthErrorEventLazy, args_);
++      Functor<int> func =
++        EventQueue.BindOne<int, AuthErrorEventArgs>(AuthErrorEventLazy, args_);
+       eventQueue.Queue(func);
+       Global.Log(0, "GAudioscrobbler.EmitAuthErrorEvent", "End");
+     }
+@@ -381,8 +381,8 @@
+         NetworkErrorEvent(args_);
+       if (NetworkErrorEventLazy == null)
+         return;
+-      Functor<void> func =
+-        EventQueue.BindOne<void, NetworkErrorEventArgs>(NetworkErrorEventLazy,
++      Functor<int> func =
++        EventQueue.BindOne<int, NetworkErrorEventArgs>(NetworkErrorEventLazy,
+                                                         args_);
+       eventQueue.Queue(func);
+       Global.Log(0, "GAudioscrobbler.EmitNetworkErrorEvent", "End");
+@@ -395,8 +395,8 @@
+         SubmitEvent(args_);
+       if (SubmitEventLazy == null)
+         return;
+-      Functor<void> func =
+-        EventQueue.BindOne<void, SubmitEventArgs>(SubmitEventLazy, args_);
++      Functor<int> func =
++        EventQueue.BindOne<int, SubmitEventArgs>(SubmitEventLazy, args_);
+       eventQueue.Queue(func);
+       Global.Log(0, "GAudioscrobbler.EmitSubmitEvent", "End");
+     }
+@@ -408,8 +408,8 @@
+         UpdateAvailableEvent(args_);
+       if (UpdateAvailableEventLazy == null)
+         return;
+-      Functor<void> func =
+-        EventQueue.BindOne<void, UpdateAvailableEventArgs>(UpdateAvailableEventLazy, args_);
++      Functor<int> func =
++        EventQueue.BindOne<int, UpdateAvailableEventArgs>(UpdateAvailableEventLazy, args_);
+       eventQueue.Queue(func);
+       Global.Log(0, "GAudioscrobbler.EmitUpdateAvailableEvent", "End");
+     }
+@@ -421,8 +421,8 @@
+         ConnectEvent(args_);
+       if (ConnectEventLazy == null)
+         return;
+-      Functor<void> func =
+-        EventQueue.BindOne<void, ConnectEventArgs>(ConnectEventLazy, args_);
++      Functor<int> func =
++        EventQueue.BindOne<int, ConnectEventArgs>(ConnectEventLazy, args_);
+       eventQueue.Queue(func);
+       Global.Log(0, "GAudioscrobbler.EmitConnectEvent", "End");
+     }
+@@ -434,8 +434,8 @@
+         DisconnectEvent(args_);
+       if (DisconnectEventLazy == null)
+         return;
+-      Functor<void> func =
+-        EventQueue.BindOne<void, DisconnectEventArgs>(DisconnectEventLazy, args_);
++      Functor<int> func =
++        EventQueue.BindOne<int, DisconnectEventArgs>(DisconnectEventLazy, args_);
+       eventQueue.Queue(func);
+       Global.Log(0, "GAudioscrobbler.EmitDisconnectEvent", "End");
+     }

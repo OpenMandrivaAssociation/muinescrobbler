@@ -1,0 +1,11 @@
+--- muinescrobbler/Makefile.~1.1.1.1.~	2005-09-26 19:51:29.000000000 +0200
++++ muinescrobbler/Makefile	2008-08-04 09:52:39.000000000 +0200
+@@ -1,7 +1,7 @@
+ CS_FILES =  EventQueue.cs Functor.cs Global.cs Song.cs GAudioscrobbler.cs AudioscrobblerPlugin.cs
+ 
+ AudioscrobblerPlugin.dll: $(CS_FILES) Audioscrobbler.glade
+-	gmcs -target:library -out:AudioscrobblerPlugin.dll -r:Mono.Security.dll -r:System.Web.dll -pkg:gconf-sharp-2.0 -pkg:glade-sharp-2.0 -pkg:muine-plugin -resource:Audioscrobbler.glade $(CS_FILES)
++	gmcs -target:library -out:AudioscrobblerPlugin.dll -r:Mono.Security.dll -r:System.Web.dll -pkg:gconf-sharp-2.0 -pkg:glade-sharp-2.0 -pkg:gnome-sharp-2.0 -pkg:muine-plugin -resource:Audioscrobbler.glade $(CS_FILES)
+ 
+ install: AudioscrobblerPlugin.dll
+ 	mkdir -p ~/.gnome2/muine/plugins
