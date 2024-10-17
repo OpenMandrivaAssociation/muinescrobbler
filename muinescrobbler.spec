@@ -12,7 +12,7 @@ Patch: muinescrobbler-new-mono.patch
 Patch1: muinescrobbler-fix-linking.patch
 License: GPLv2+
 Group: Sound
-Url: http://home.gna.org/muinescrobbler/
+Url: https://home.gna.org/muinescrobbler/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 BuildArch: noarch
 BuildRequires: muine
