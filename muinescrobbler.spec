@@ -15,6 +15,7 @@ Group: Sound
 Url: https://home.gna.org/muinescrobbler/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 BuildArch: noarch
+BuildRequires:	make
 BuildRequires: muine
 BuildRequires: gnome-sharp2-devel
 Requires: muine
